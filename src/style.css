@@ -877,10 +877,27 @@ h3 {
   .hero {
     width: 100%;
     flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
   }
 
   .hero-actions {
     flex-wrap: wrap;
+    position: static;
+    left: auto;
+    transform: none;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .brand {
+    margin-right: 0;
+  }
+
+  .brand-logo {
+    width: 72px;
+    height: 72px;
   }
 
   .grid-3 {
@@ -899,6 +916,10 @@ h3 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .events-list-grid {
+    grid-template-columns: 1fr;
+  }
+
   .card-head,
   .card-actions {
     flex-direction: column;
@@ -911,17 +932,65 @@ h3 {
 }
 
 @media (max-width: 720px) {
+  #app {
+    padding: 12px;
+  }
+
+  .page {
+    gap: 12px;
+  }
+
+  .content-page {
+    padding: 18px 14px;
+  }
+
+  .page-title {
+    font-size: 1.35rem;
+  }
+
+  .hero {
+    padding: 12px;
+  }
+
+  .hero-actions {
+    gap: 8px;
+  }
+
+  .glass-button {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 132px;
+    padding: 11px 14px;
+    font-size: 0.76rem;
+  }
+
+  .pdf-modal {
+    padding: 10px;
+  }
+
+  .pdf-modal-dialog {
+    height: 82vh;
+    border-radius: 14px;
+  }
+
+  .news-modal {
+    padding: 10px;
+  }
+
+  .news-modal-dialog {
+    border-radius: 14px;
+  }
+
+  .news-photo {
+    height: min(36vh, 280px);
+  }
+
+  .people-grid {
+    grid-template-columns: 1fr;
+  }
+
   .glass-panel {
-    background:
-      linear-gradient(180deg, rgba(30, 30, 30, 0.86), rgba(13, 13, 13, 0.9)),
-      repeating-linear-gradient(
-        45deg,
-        rgba(255, 255, 255, 0.012),
-        rgba(255, 255, 255, 0.012) 2px,
-        transparent 2px,
-        transparent 4px
-      );
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    background: linear-gradient(165deg, rgba(255, 255, 255, 0.9), rgba(248, 248, 248, 0.78));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 }

@@ -8,7 +8,7 @@ app.innerHTML = `
 <main class="page">
   <header class="glass-panel hero artlab-hero">
     <div class="brand">
-      <img class="brand-logo" src="/artlab-logo.svg" alt="ArtLab logo" />
+      <img class="brand-logo" src="/artlab-logo.svg" alt="politech.com logo" />
     </div>
     <div class="hero-actions">
       <button class="glass-button nav-button is-active" type="button">Новости</button>
@@ -21,7 +21,7 @@ app.innerHTML = `
   <section class="glass-panel content-page">
     <h1 id="page-title" class="page-title">Новости</h1>
     <div id="page-content" class="page-content">
-      <p>Последние новости ArtLab и важные обновления студенческой жизни.</p>
+      <p>Последние новости politech.com и важные обновления студенческой жизни.</p>
     </div>
   </section>
 
@@ -286,7 +286,7 @@ const renderPage = (title: string) => {
 
   const pages: Record<string, string> = {
     'Календарь событий': 'Ближайшие мероприятия, встречи и дедлайны по проектам.',
-    Люди: 'Команда ArtLab, активисты и ключевые контакты сообщества.',
+    Люди: 'Команда politech.com, активисты и ключевые контакты сообщества.',
   }
   pageContent.innerHTML = `<p>${pages[title] ?? 'Содержимое страницы будет добавлено.'}</p>`
 }
