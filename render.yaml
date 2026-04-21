@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: artlab-site
+    runtime: node
+    repo: https://github.com/EgorVoronin06/politech.com.git
+    branch: main
+    plan: free
+    autoDeploy: true
+    buildCommand: npm install && npm run build
+    startCommand: npm run server
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: EDITOR_KEY
+        sync: false
+      - key: EDITOR_PATH
+        value: /editor-7f3k2
