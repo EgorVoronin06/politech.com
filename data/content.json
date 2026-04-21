@@ -1,0 +1,156 @@
+{
+  "news": [
+    {
+      "id": "hackathon",
+      "title": "Ночной хакатон ArtLab",
+      "description": "Команды за 12 часов разработали прототипы сервисов для учебного кампуса. В программе: менторские сессии, питчинг и разбор решений экспертов.",
+      "photos": [
+        "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80"
+      ]
+    },
+    {
+      "id": "career-day",
+      "title": "День карьеры и стажировок",
+      "description": "Встреча с работодателями и выпускниками: разбор резюме, открытые вакансии, практические советы по прохождению интервью и подготовке портфолио.",
+      "photos": [
+        "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80"
+      ]
+    },
+    {
+      "id": "science-lab",
+      "title": "Открытая лаборатория проектов",
+      "description": "Презентации исследовательских команд, демонстрация инженерных макетов и обсуждение направлений для новых междисциплинарных проектов.",
+      "photos": [
+        "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1582719471384-894fbb16e074?auto=format&fit=crop&w=1200&q=80"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "open-lecture-1",
+      "date": "2026-05-11",
+      "title": "Открытая лекция по ИИ",
+      "place": "Актовый зал",
+      "description": "Лекция о применении ИИ в студенческих проектах и практических кейсах."
+    },
+    {
+      "id": "demo-day-1",
+      "date": "2026-05-18",
+      "title": "Demo Day проектов",
+      "place": "Коворкинг ArtLab",
+      "description": "Презентации команд и обратная связь от преподавателей и индустриальных экспертов."
+    }
+  ],
+  "people": [
+    {
+      "id": "anna-petrova",
+      "name": "Анна Петрова",
+      "role": "Руководитель проекта",
+      "photo": ""
+    },
+    {
+      "id": "ilya-smirnov",
+      "name": "Илья Смирнов",
+      "role": "Frontend разработчик",
+      "photo": ""
+    },
+    {
+      "id": "maria-kuznecova",
+      "name": "Мария Кузнецова",
+      "role": "UX/UI дизайнер",
+      "photo": ""
+    },
+    {
+      "id": "dmitriy-orlov",
+      "name": "Дмитрий Орлов",
+      "role": "Backend разработчик",
+      "photo": ""
+    },
+    {
+      "id": "elena-morozova",
+      "name": "Елена Морозова",
+      "role": "Координатор событий",
+      "photo": ""
+    },
+    {
+      "id": "aleksey-volkov",
+      "name": "Алексей Волков",
+      "role": "Системный аналитик",
+      "photo": ""
+    },
+    {
+      "id": "sofiya-belova",
+      "name": "София Белова",
+      "role": "Менеджер сообщества",
+      "photo": ""
+    },
+    {
+      "id": "nikita-sokolov",
+      "name": "Никита Соколов",
+      "role": "Технический редактор",
+      "photo": ""
+    }
+  ],
+  "schedulePdfs": [
+    {
+      "id": "applied-math",
+      "title": "Прикладная математика и информатика",
+      "file": "/pdfs/Prikladnaya-matematika-i-informatika.pdf",
+      "description": "Учебный план направления"
+    },
+    {
+      "id": "physics",
+      "title": "Физика",
+      "file": "/pdfs/Fizika.pdf",
+      "description": "Учебный план направления"
+    },
+    {
+      "id": "telecom",
+      "title": "Инфокоммуникационные технологии и системы связи",
+      "file": "/pdfs/Infokommunikatsionnye-tehnologii-i-sistemy-svyazi.pdf",
+      "description": "Учебный план направления"
+    },
+    {
+      "id": "software-engineering",
+      "title": "Программная инженерия",
+      "file": "/pdfs/Programmnaya-inzheneriya.pdf",
+      "description": "Учебный план направления"
+    },
+    {
+      "id": "control-systems",
+      "title": "Управление в технических системах",
+      "file": "/pdfs/Upravlenie-v-tehnicheskih-sistemah.pdf",
+      "description": "Учебный план направления"
+    },
+    {
+      "id": "construction",
+      "title": "Строительство",
+      "file": "/pdfs/Stroitelstvo.pdf",
+      "description": "Учебный план направления"
+    },
+    {
+      "id": "it-systems",
+      "title": "Информационные системы и технологии",
+      "file": "/pdfs/Informatsionnye-sistemy-i-tehnologii.pdf",
+      "description": "Учебный план направления"
+    },
+    {
+      "id": "computer-science",
+      "title": "Информатика и вычислительная техника",
+      "file": "/pdfs/Informatika-i-vychislitelnaya-tehnika.pdf",
+      "description": "Учебный план направления"
+    },
+    {
+      "id": "electro",
+      "title": "Электроэнергетика и электротехника",
+      "file": "/pdfs/Elektroenergetika-i-elektrotehnika.pdf",
+      "description": "Учебный план направления"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ArtLab Admin</title>
+    <link rel="stylesheet" href="/admin-assets/admin.css" />
+  </head>
+  <body>
+    <main class="admin-page">
+      <header class="admin-header">
+        <h1>Редактор контента ArtLab</h1>
+        <p>Управление разделами: новости, календарь, люди.</p>
+      </header>
+
+      <section class="panel">
+        <h2>Ключ редактора</h2>
+        <div class="row">
+          <input id="editor-key" type="password" placeholder="Введите EDITOR_KEY" />
+          <button id="save-key" type="button">Сохранить ключ</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Новости</h2>
+        <form id="news-form" class="grid">
+          <input name="id" placeholder="id (например news-1)" required />
+          <input name="title" placeholder="Заголовок" required />
+          <textarea name="description" placeholder="Описание" required></textarea>
+          <textarea name="photos" placeholder="Фото URL, по одному в строке"></textarea>
+          <button type="submit">Добавить</button>
+        </form>
+        <div id="news-list" class="list"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Календарь событий</h2>
+        <form id="events-form" class="grid">
+          <input name="id" placeholder="id (например event-1)" required />
+          <input name="date" type="date" required />
+          <input name="title" placeholder="Заголовок" required />
+          <input name="place" placeholder="Место" required />
+          <textarea name="description" placeholder="Описание" required></textarea>
+          <button type="submit">Добавить</button>
+        </form>
+        <div id="events-list" class="list"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Люди</h2>
+        <form id="people-form" class="grid">
+          <input name="id" placeholder="id (например person-1)" required />
+          <input name="name" placeholder="Имя" required />
+          <input name="role" placeholder="Должность" required />
+          <input name="photo" placeholder="Фото URL (опционально)" />
+          <button type="submit">Добавить</button>
+        </form>
+        <div id="people-list" class="list"></div>
+      </section>
+
+    </main>
+
+    <script type="module" src="/admin-assets/admin.js"></script>
+  </body>
+</html>
