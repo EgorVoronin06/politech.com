@@ -10,14 +10,12 @@ const sitePort = Number(process.env.PORT) || 3000
 const adminPort = Number(process.env.ADMIN_PORT) || 3001
 const editorPath = process.env.EDITOR_PATH || '/editor-7f3k2'
 const editorKey = process.env.EDITOR_KEY || 'artlab-dev-key'
+const singlePort = process.env.SINGLE_PORT === 'true' || process.env.NODE_ENV === 'production'
 
 const distDir = path.join(__dirname, 'dist')
 const adminDir = path.join(__dirname, 'admin')
 const dataDir = path.join(__dirname, 'data')
 const dataFile = path.join(dataDir, 'content.json')
-
-const publicApp = express()
-const adminApp = express()
 
 const sectionMap = {
   news: 'news',
@@ -65,103 +63,131 @@ const registerCommonRoutes = (app) => {
   })
 }
 
-registerCommonRoutes(publicApp)
-registerCommonRoutes(adminApp)
+const registerAdminApiRoutes = (app) => {
+  app.use(express.json({ limit: '2mb' }))
 
-adminApp.use(express.json({ limit: '2mb' }))
-
-adminApp.post('/api/admin/:section', requireEditorKey, async (req, res) => {
-  const field = validateSection(req.params.section)
-  if (!field) {
-    res.status(404).json({ error: 'Unknown section' })
-    return
-  }
-  const item = req.body
-  if (!item || typeof item !== 'object') {
-    res.status(400).json({ error: 'Invalid payload' })
-    return
-  }
-
-  try {
-    const content = await getContent()
-    content[field].push(item)
-    await saveContent(content)
-    res.status(201).json(item)
-  } catch {
-    res.status(500).json({ error: 'Failed to save content' })
-  }
-})
-
-adminApp.put('/api/admin/:section/:id', requireEditorKey, async (req, res) => {
-  const field = validateSection(req.params.section)
-  if (!field) {
-    res.status(404).json({ error: 'Unknown section' })
-    return
-  }
-
-  try {
-    const content = await getContent()
-    const list = content[field]
-    const index = list.findIndex((item) => item.id === req.params.id)
-    if (index < 0) {
-      res.status(404).json({ error: 'Item not found' })
+  app.post('/api/admin/:section', requireEditorKey, async (req, res) => {
+    const field = validateSection(req.params.section)
+    if (!field) {
+      res.status(404).json({ error: 'Unknown section' })
       return
     }
-    list[index] = { ...list[index], ...req.body, id: req.params.id }
-    await saveContent(content)
-    res.json(list[index])
-  } catch {
-    res.status(500).json({ error: 'Failed to update content' })
-  }
-})
-
-adminApp.delete('/api/admin/:section/:id', requireEditorKey, async (req, res) => {
-  const field = validateSection(req.params.section)
-  if (!field) {
-    res.status(404).json({ error: 'Unknown section' })
-    return
-  }
-
-  try {
-    const content = await getContent()
-    const list = content[field]
-    const nextList = list.filter((item) => item.id !== req.params.id)
-    if (nextList.length === list.length) {
-      res.status(404).json({ error: 'Item not found' })
+    const item = req.body
+    if (!item || typeof item !== 'object') {
+      res.status(400).json({ error: 'Invalid payload' })
       return
     }
-    content[field] = nextList
-    await saveContent(content)
-    res.status(204).send()
-  } catch {
-    res.status(500).json({ error: 'Failed to delete content' })
-  }
-})
 
-publicApp.use(express.static(distDir))
-publicApp.use('/admin-assets', express.static(adminDir))
-adminApp.use('/admin-assets', express.static(adminDir))
+    try {
+      const content = await getContent()
+      content[field].push(item)
+      await saveContent(content)
+      res.status(201).json(item)
+    } catch {
+      res.status(500).json({ error: 'Failed to save content' })
+    }
+  })
 
-adminApp.get(editorPath, (_req, res) => {
-  res.sendFile(path.join(adminDir, 'index.html'))
-})
+  app.put('/api/admin/:section/:id', requireEditorKey, async (req, res) => {
+    const field = validateSection(req.params.section)
+    if (!field) {
+      res.status(404).json({ error: 'Unknown section' })
+      return
+    }
 
-publicApp.get(editorPath, (_req, res) => {
-  res.redirect(`http://localhost:${adminPort}${editorPath}`)
-})
+    try {
+      const content = await getContent()
+      const list = content[field]
+      const index = list.findIndex((item) => item.id === req.params.id)
+      if (index < 0) {
+        res.status(404).json({ error: 'Item not found' })
+        return
+      }
+      list[index] = { ...list[index], ...req.body, id: req.params.id }
+      await saveContent(content)
+      res.json(list[index])
+    } catch {
+      res.status(500).json({ error: 'Failed to update content' })
+    }
+  })
 
-publicApp.use((_req, res) => {
-  res.sendFile(path.join(distDir, 'index.html'))
-})
+  app.delete('/api/admin/:section/:id', requireEditorKey, async (req, res) => {
+    const field = validateSection(req.params.section)
+    if (!field) {
+      res.status(404).json({ error: 'Unknown section' })
+      return
+    }
 
-adminApp.use((_req, res) => {
-  res.status(404).json({ error: 'Not found' })
-})
+    try {
+      const content = await getContent()
+      const list = content[field]
+      const nextList = list.filter((item) => item.id !== req.params.id)
+      if (nextList.length === list.length) {
+        res.status(404).json({ error: 'Item not found' })
+        return
+      }
+      content[field] = nextList
+      await saveContent(content)
+      res.status(204).send()
+    } catch {
+      res.status(500).json({ error: 'Failed to delete content' })
+    }
+  })
+}
 
-publicApp.listen(sitePort, () => {
-  console.log(`Site is running at http://localhost:${sitePort}`)
-})
+if (singlePort) {
+  const app = express()
+  registerCommonRoutes(app)
+  registerAdminApiRoutes(app)
 
-adminApp.listen(adminPort, () => {
-  console.log(`Admin is running at http://localhost:${adminPort}${editorPath}`)
-})
+  app.use('/admin-assets', express.static(adminDir))
+  app.use(express.static(distDir))
+
+  app.get(editorPath, (_req, res) => {
+    res.sendFile(path.join(adminDir, 'index.html'))
+  })
+
+  app.use((_req, res) => {
+    res.sendFile(path.join(distDir, 'index.html'))
+  })
+
+  app.listen(sitePort, () => {
+    console.log(`Site and admin are running at http://localhost:${sitePort}`)
+    console.log(`Admin path: http://localhost:${sitePort}${editorPath}`)
+  })
+} else {
+  const publicApp = express()
+  const adminApp = express()
+
+  registerCommonRoutes(publicApp)
+  registerCommonRoutes(adminApp)
+  registerAdminApiRoutes(adminApp)
+
+  publicApp.use(express.static(distDir))
+  publicApp.use('/admin-assets', express.static(adminDir))
+  adminApp.use('/admin-assets', express.static(adminDir))
+
+  adminApp.get(editorPath, (_req, res) => {
+    res.sendFile(path.join(adminDir, 'index.html'))
+  })
+
+  publicApp.get(editorPath, (_req, res) => {
+    res.redirect(`http://localhost:${adminPort}${editorPath}`)
+  })
+
+  publicApp.use((_req, res) => {
+    res.sendFile(path.join(distDir, 'index.html'))
+  })
+
+  adminApp.use((_req, res) => {
+    res.status(404).json({ error: 'Not found' })
+  })
+
+  publicApp.listen(sitePort, () => {
+    console.log(`Site is running at http://localhost:${sitePort}`)
+  })
+
+  adminApp.listen(adminPort, () => {
+    console.log(`Admin is running at http://localhost:${adminPort}${editorPath}`)
+  })
+}
