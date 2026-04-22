@@ -138,7 +138,7 @@ const registerCommonRoutes = (app) => {
 }
 
 const registerAdminApiRoutes = (app) => {
-  app.use(express.json({ limit: '2mb' }))
+  app.use(express.json({ limit: '25mb' }))
 
   app.post('/api/admin/upload', requireEditorKey, upload.array('photos', 10), (req, res) => {
     const files = Array.isArray(req.files) ? req.files : []

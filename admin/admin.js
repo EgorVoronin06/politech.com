@@ -39,23 +39,18 @@ const request = async (url, options = {}) => {
   return response.json()
 }
 
-const uploadFiles = async (files) => {
-  if (!files || files.length === 0) return []
-  const payload = new FormData()
-  Array.from(files).forEach((file) => payload.append('photos', file))
-  const response = await fetch(`${API_BASE}/api/admin/upload`, {
-    method: 'POST',
-    headers: {
-      'X-Editor-Key': getKey(),
-    },
-    body: payload,
+const readFileAsDataUrl = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result || ''))
+    reader.onerror = () => reject(new Error('Не удалось прочитать файл'))
+    reader.readAsDataURL(file)
   })
-  if (!response.ok) {
-    const text = await response.text()
-    throw new Error(text || `HTTP ${response.status}`)
-  }
-  const data = await response.json()
-  return data.files.map((file) => file.path)
+
+const filesToDataUrls = async (files) => {
+  if (!files || files.length === 0) return []
+  const all = await Promise.all(Array.from(files).map((file) => readFileAsDataUrl(file)))
+  return all.filter(Boolean)
 }
 
 const renderList = (section, items) => {
@@ -106,7 +101,7 @@ forms.news?.addEventListener('submit', async (event) => {
   event.preventDefault()
   const formData = new FormData(forms.news)
   const photosInput = forms.news.querySelector('input[name="photosUpload"]')
-  const photos = await uploadFiles(photosInput?.files || [])
+  const photos = await filesToDataUrls(photosInput?.files || [])
   await createItem('news', {
     id: String(formData.get('id')),
     title: String(formData.get('title')),
@@ -133,7 +128,7 @@ forms.people?.addEventListener('submit', async (event) => {
   event.preventDefault()
   const formData = new FormData(forms.people)
   const photoInput = forms.people.querySelector('input[name="photoUpload"]')
-  const photoList = await uploadFiles(photoInput?.files || [])
+  const photoList = await filesToDataUrls(photoInput?.files || [])
   await createItem('people', {
     id: String(formData.get('id')),
     name: String(formData.get('name')),
