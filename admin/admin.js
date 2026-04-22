@@ -39,6 +39,25 @@ const request = async (url, options = {}) => {
   return response.json()
 }
 
+const uploadFiles = async (files) => {
+  if (!files || files.length === 0) return []
+  const payload = new FormData()
+  Array.from(files).forEach((file) => payload.append('photos', file))
+  const response = await fetch(`${API_BASE}/api/admin/upload`, {
+    method: 'POST',
+    headers: {
+      'X-Editor-Key': getKey(),
+    },
+    body: payload,
+  })
+  if (!response.ok) {
+    const text = await response.text()
+    throw new Error(text || `HTTP ${response.status}`)
+  }
+  const data = await response.json()
+  return data.files.map((file) => file.path)
+}
+
 const renderList = (section, items) => {
   const root = lists[section]
   if (!root) return
@@ -86,11 +105,8 @@ const createItem = async (section, payload) => {
 forms.news?.addEventListener('submit', async (event) => {
   event.preventDefault()
   const formData = new FormData(forms.news)
-  const photosRaw = String(formData.get('photos') || '')
-  const photos = photosRaw
-    .split('\n')
-    .map((value) => value.trim())
-    .filter(Boolean)
+  const photosInput = forms.news.querySelector('input[name="photosUpload"]')
+  const photos = await uploadFiles(photosInput?.files || [])
   await createItem('news', {
     id: String(formData.get('id')),
     title: String(formData.get('title')),
@@ -116,11 +132,13 @@ forms.events?.addEventListener('submit', async (event) => {
 forms.people?.addEventListener('submit', async (event) => {
   event.preventDefault()
   const formData = new FormData(forms.people)
+  const photoInput = forms.people.querySelector('input[name="photoUpload"]')
+  const photoList = await uploadFiles(photoInput?.files || [])
   await createItem('people', {
     id: String(formData.get('id')),
     name: String(formData.get('name')),
     role: String(formData.get('role')),
-    photo: String(formData.get('photo') || ''),
+    photo: photoList[0] || '',
   })
   forms.people.reset()
 })

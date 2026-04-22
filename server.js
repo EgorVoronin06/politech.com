@@ -3,6 +3,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { Pool } from 'pg'
+import multer from 'multer'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -18,6 +19,7 @@ const distDir = path.join(__dirname, 'dist')
 const adminDir = path.join(__dirname, 'admin')
 const dataDir = path.join(__dirname, 'data')
 const dataFile = path.join(dataDir, 'content.json')
+const uploadsDir = path.join(__dirname, 'public', 'uploads')
 const pool = databaseUrl
   ? new Pool({
       connectionString: databaseUrl,
@@ -102,6 +104,24 @@ const requireEditorKey = (req, res, next) => {
   next()
 }
 
+const uploadStorage = multer.diskStorage({
+  destination: async (_req, _file, cb) => {
+    try {
+      await fs.mkdir(uploadsDir, { recursive: true })
+      cb(null, uploadsDir)
+    } catch (error) {
+      cb(error, uploadsDir)
+    }
+  },
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname)
+    const safeName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`
+    cb(null, safeName)
+  },
+})
+
+const upload = multer({ storage: uploadStorage })
+
 const registerCommonRoutes = (app) => {
   app.get('/api/health', (_req, res) => {
     res.json({ ok: true, storage: pool ? 'postgres' : 'json-file' })
@@ -119,6 +139,15 @@ const registerCommonRoutes = (app) => {
 
 const registerAdminApiRoutes = (app) => {
   app.use(express.json({ limit: '2mb' }))
+
+  app.post('/api/admin/upload', requireEditorKey, upload.array('photos', 10), (req, res) => {
+    const files = Array.isArray(req.files) ? req.files : []
+    const uploaded = files.map((file) => ({
+      name: file.originalname,
+      path: `/uploads/${file.filename}`,
+    }))
+    res.status(201).json({ files: uploaded })
+  })
 
   app.post('/api/admin/:section', requireEditorKey, async (req, res) => {
     const field = validateSection(req.params.section)

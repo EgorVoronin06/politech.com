@@ -27,7 +27,7 @@
           <input name="id" placeholder="id (например news-1)" required />
           <input name="title" placeholder="Заголовок" required />
           <textarea name="description" placeholder="Описание" required></textarea>
-          <textarea name="photos" placeholder="Фото URL, по одному в строке"></textarea>
+          <input name="photosUpload" type="file" accept="image/*" multiple />
           <button type="submit">Добавить</button>
         </form>
         <div id="news-list" class="list"></div>
@@ -52,7 +52,7 @@
           <input name="id" placeholder="id (например person-1)" required />
           <input name="name" placeholder="Имя" required />
           <input name="role" placeholder="Должность" required />
-          <input name="photo" placeholder="Фото URL (опционально)" />
+          <input name="photoUpload" type="file" accept="image/*" />
           <button type="submit">Добавить</button>
         </form>
         <div id="people-list" class="list"></div>
