@@ -219,8 +219,11 @@ h1 {
 
 .news-card-image {
   width: 100%;
-  height: 160px;
-  object-fit: cover;
+  height: auto;
+  max-height: 320px;
+  object-fit: contain;
+  display: block;
+  background: #faf9f6;
 }
 
 .news-card-body {
@@ -301,6 +304,12 @@ h1 {
 .news-description {
   margin: 0 0 12px;
   color: #2d2d2d;
+}
+
+.news-description a {
+  color: #c31111;
+  text-decoration: underline;
+  word-break: break-word;
 }
 
 .news-gallery-controls {
@@ -422,6 +431,15 @@ h1 {
 .calendar-day.muted {
   color: #a8a8a8;
   cursor: default;
+}
+
+.calendar-day.has-event {
+  box-shadow: inset 0 -3px 0 #c31111;
+  font-weight: 700;
+}
+
+.calendar-day.selected.has-event {
+  box-shadow: inset 0 -3px 0 #faf9f6;
 }
 
 .events-list {

@@ -227,6 +227,7 @@ const startServers = async () => {
     registerAdminApiRoutes(app)
 
     app.use('/admin-assets', express.static(adminDir))
+    app.use('/uploads', express.static(uploadsDir))
     app.use(express.static(distDir))
 
     app.get(editorPath, (_req, res) => {
@@ -253,7 +254,9 @@ const startServers = async () => {
   registerAdminApiRoutes(adminApp)
 
   publicApp.use(express.static(distDir))
+  publicApp.use('/uploads', express.static(uploadsDir))
   publicApp.use('/admin-assets', express.static(adminDir))
+  adminApp.use('/uploads', express.static(uploadsDir))
   adminApp.use('/admin-assets', express.static(adminDir))
 
   adminApp.get(editorPath, (_req, res) => {

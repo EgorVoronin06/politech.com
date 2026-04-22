@@ -154,12 +154,36 @@ let calendarDate = new Date()
 let selectedDay: number | null = new Date().getDate()
 let currentPageTitle = 'Новости'
 
+const escapeHtml = (value: string) =>
+  value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+
+const formatWithLinks = (value: string) => {
+  const escaped = escapeHtml(value).replace(/\r?\n/g, '<br />')
+  return escaped.replace(
+    /(https?:\/\/[^\s<]+)/g,
+    '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>',
+  )
+}
+
 const renderCalendarPage = () => {
   const year = calendarDate.getFullYear()
   const month = calendarDate.getMonth()
   const firstWeekDay = (new Date(year, month, 1).getDay() + 6) % 7
   const daysInMonth = new Date(year, month + 1, 0).getDate()
   const prevMonthDays = new Date(year, month, 0).getDate()
+  const eventDays = new Set(
+    contentData.events
+      .filter((eventItem) => {
+        const date = new Date(eventItem.date)
+        return !Number.isNaN(date.getTime()) && date.getFullYear() === year && date.getMonth() === month
+      })
+      .map((eventItem) => new Date(eventItem.date).getDate()),
+  )
 
   const cells: string[] = []
 
@@ -170,8 +194,9 @@ const renderCalendarPage = () => {
 
   for (let day = 1; day <= daysInMonth; day += 1) {
     const isSelected = selectedDay === day
+    const hasEvent = eventDays.has(day)
     cells.push(
-      `<button class="calendar-day ${isSelected ? 'selected' : ''}" type="button" data-calendar-day="${day}">${day}</button>`,
+      `<button class="calendar-day ${isSelected ? 'selected' : ''} ${hasEvent ? 'has-event' : ''}" type="button" data-calendar-day="${day}">${day}</button>`,
     )
   }
 
@@ -299,6 +324,10 @@ const closePdfModal = () => {
 }
 
 const openPdfModal = (file: string) => {
+  if (window.matchMedia('(max-width: 720px)').matches) {
+    window.open(file, '_blank', 'noopener,noreferrer')
+    return
+  }
   pdfFrame.src = file
   pdfModal.classList.add('is-open')
   pdfModal.setAttribute('aria-hidden', 'false')
@@ -315,7 +344,7 @@ const syncNewsModal = () => {
   if (!activeNews) return
   newsPhoto.src = activeNews.photos[activeNewsPhoto]
   newsTitle.textContent = activeNews.title
-  newsDescription.textContent = activeNews.description
+  newsDescription.innerHTML = formatWithLinks(activeNews.description)
   newsGalleryIndex.textContent = `${activeNewsPhoto + 1} / ${activeNews.photos.length}`
 }
 
