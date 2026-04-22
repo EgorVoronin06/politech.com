@@ -152,6 +152,7 @@ const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 
 let calendarDate = new Date()
 let selectedDay: number | null = new Date().getDate()
+let currentPageTitle = 'Новости'
 
 const renderCalendarPage = () => {
   const year = calendarDate.getFullYear()
@@ -333,6 +334,7 @@ navButtons.forEach((button) => {
     navButtons.forEach((item) => item.classList.remove('is-active'))
     button.classList.add('is-active')
     const title = button.textContent?.trim() ?? 'Страница'
+    currentPageTitle = title
     pageTitle.textContent = title
     renderPage(title)
   })
@@ -424,7 +426,24 @@ const loadContent = async () => {
 
 const init = async () => {
   await loadContent()
-  renderPage('Новости')
+  renderPage(currentPageTitle)
 }
+
+const refreshContentAndPage = async () => {
+  await loadContent()
+  renderPage(currentPageTitle)
+}
+
+setInterval(() => {
+  if (document.visibilityState === 'visible') {
+    void refreshContentAndPage()
+  }
+}, 15000)
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    void refreshContentAndPage()
+  }
+})
 
 void init()

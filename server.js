@@ -2,6 +2,7 @@ import express from 'express'
 import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { Pool } from 'pg'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -11,11 +12,18 @@ const adminPort = Number(process.env.ADMIN_PORT) || 3001
 const editorPath = process.env.EDITOR_PATH || '/editor-7f3k2'
 const editorKey = process.env.EDITOR_KEY || 'artlab-dev-key'
 const singlePort = process.env.SINGLE_PORT === 'true' || process.env.NODE_ENV === 'production'
+const databaseUrl = process.env.DATABASE_URL
 
 const distDir = path.join(__dirname, 'dist')
 const adminDir = path.join(__dirname, 'admin')
 const dataDir = path.join(__dirname, 'data')
 const dataFile = path.join(dataDir, 'content.json')
+const pool = databaseUrl
+  ? new Pool({
+      connectionString: databaseUrl,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,
+    })
+  : null
 
 const sectionMap = {
   news: 'news',
@@ -23,14 +31,60 @@ const sectionMap = {
   people: 'people',
 }
 
-const getContent = async () => {
+const getFileContent = async () => {
   const raw = await fs.readFile(dataFile, 'utf-8')
   return JSON.parse(raw)
 }
 
-const saveContent = async (content) => {
+const saveFileContent = async (content) => {
   await fs.mkdir(dataDir, { recursive: true })
   await fs.writeFile(dataFile, `${JSON.stringify(content, null, 2)}\n`, 'utf-8')
+}
+
+const ensureDatabase = async () => {
+  if (!pool) return
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS site_content (
+      id INTEGER PRIMARY KEY,
+      data JSONB NOT NULL,
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    );
+  `)
+
+  const countResult = await pool.query('SELECT COUNT(*)::int AS count FROM site_content')
+  if (countResult.rows[0].count > 0) return
+
+  const seedData = await getFileContent()
+  await pool.query('INSERT INTO site_content (id, data) VALUES ($1, $2)', [1, seedData])
+}
+
+const getContent = async () => {
+  if (!pool) return getFileContent()
+
+  const result = await pool.query('SELECT data FROM site_content WHERE id = 1')
+  if (result.rowCount && result.rows[0]?.data) return result.rows[0].data
+
+  const seedData = await getFileContent()
+  await pool.query('INSERT INTO site_content (id, data) VALUES ($1, $2)', [1, seedData])
+  return seedData
+}
+
+const saveContent = async (content) => {
+  if (!pool) {
+    await saveFileContent(content)
+    return
+  }
+
+  await pool.query(
+    `
+      INSERT INTO site_content (id, data, updated_at)
+      VALUES (1, $1, NOW())
+      ON CONFLICT (id)
+      DO UPDATE SET data = EXCLUDED.data, updated_at = NOW();
+    `,
+    [content],
+  )
 }
 
 const validateSection = (section) => {
@@ -50,7 +104,7 @@ const requireEditorKey = (req, res, next) => {
 
 const registerCommonRoutes = (app) => {
   app.get('/api/health', (_req, res) => {
-    res.json({ ok: true })
+    res.json({ ok: true, storage: pool ? 'postgres' : 'json-file' })
   })
 
   app.get('/api/content', async (_req, res) => {
@@ -135,27 +189,33 @@ const registerAdminApiRoutes = (app) => {
   })
 }
 
-if (singlePort) {
-  const app = express()
-  registerCommonRoutes(app)
-  registerAdminApiRoutes(app)
+const startServers = async () => {
+  await ensureDatabase()
 
-  app.use('/admin-assets', express.static(adminDir))
-  app.use(express.static(distDir))
+  if (singlePort) {
+    const app = express()
+    registerCommonRoutes(app)
+    registerAdminApiRoutes(app)
 
-  app.get(editorPath, (_req, res) => {
-    res.sendFile(path.join(adminDir, 'index.html'))
-  })
+    app.use('/admin-assets', express.static(adminDir))
+    app.use(express.static(distDir))
 
-  app.use((_req, res) => {
-    res.sendFile(path.join(distDir, 'index.html'))
-  })
+    app.get(editorPath, (_req, res) => {
+      res.sendFile(path.join(adminDir, 'index.html'))
+    })
 
-  app.listen(sitePort, () => {
-    console.log(`Site and admin are running at http://localhost:${sitePort}`)
-    console.log(`Admin path: http://localhost:${sitePort}${editorPath}`)
-  })
-} else {
+    app.use((_req, res) => {
+      res.sendFile(path.join(distDir, 'index.html'))
+    })
+
+    app.listen(sitePort, () => {
+      console.log(`Site and admin are running at http://localhost:${sitePort}`)
+      console.log(`Admin path: http://localhost:${sitePort}${editorPath}`)
+      console.log(`Storage mode: ${pool ? 'PostgreSQL' : 'JSON file'}`)
+    })
+    return
+  }
+
   const publicApp = express()
   const adminApp = express()
 
@@ -185,9 +245,15 @@ if (singlePort) {
 
   publicApp.listen(sitePort, () => {
     console.log(`Site is running at http://localhost:${sitePort}`)
+    console.log(`Storage mode: ${pool ? 'PostgreSQL' : 'JSON file'}`)
   })
 
   adminApp.listen(adminPort, () => {
     console.log(`Admin is running at http://localhost:${adminPort}${editorPath}`)
   })
 }
+
+startServers().catch((error) => {
+  console.error('Server startup failed:', error)
+  process.exit(1)
+})
